@@ -42,7 +42,7 @@ register user with `POST` http://localhost:4000/api/auth/register
 Body:
 ```json
 {
-  "name": "your_github_login",
+  "username": "your_github_login",
   "password": "TEST_PASSWORD"
 }
 ```

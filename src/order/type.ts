@@ -7,20 +7,19 @@ export enum OrderStatus {
   Cancelled = 'CANCELLED',
 }
 
-type StatusHistory = Array<{
-  status: OrderStatus;
-  timestamp: number;
-  comment: string;
-}>;
-
 export type Address = {
   address: string;
   firstName: string;
   lastName: string;
   comment: string;
 };
+
+export type Payment = Record<string, unknown>;
+
+export type Delivery = Record<string, unknown>;
+
 export type CreateOrderDto = {
-  items: Array<{ productId: string; count: 1 }>;
+  items: Array<{ productId: string; count: number }>;
   address: {
     comment: string;
     address: string;

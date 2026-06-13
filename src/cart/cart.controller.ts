@@ -4,19 +4,21 @@ import {
   Delete,
   Put,
   Body,
+  Param,
   Req,
   UseGuards,
   HttpStatus,
   HttpCode,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { BasicAuthGuard } from '../auth';
 import { Order, OrderService } from '../order';
 import { AppRequest, getUserIdFromRequest } from '../shared';
 import { calculateCartTotal } from './models-rules';
 import { CartService } from './services';
-import { Cart, CartItem } from './models';
-import { CreateOrderDto, PutCartPayload } from 'src/order/type';
+import { CartItem } from './models';
+import { CreateOrderDto, OrderStatus, PutCartPayload } from 'src/order/type';
 
 @Controller('api/profile/cart')
 export class CartController {
@@ -76,7 +78,7 @@ export class CartController {
 
     const { id: cartId, items } = cart;
     const total = calculateCartTotal(items);
-    const order = this.orderService.create({
+    const order = await this.orderService.create({
       userId,
       cartId,
       items: items.map(({ product, count }) => ({
@@ -86,7 +88,6 @@ export class CartController {
       address: body.address,
       total,
     });
-    await this.cartService.removeByUserId(userId);
 
     return {
       order,
@@ -95,7 +96,55 @@ export class CartController {
 
   @UseGuards(BasicAuthGuard)
   @Get('order')
-  getOrder(): Order[] {
-    return this.orderService.getAll();
+  async getOrder(@Req() req: AppRequest): Promise<Order[]> {
+    const userId = getUserIdFromRequest(req);
+    return await this.orderService.getAll(userId);
+  }
+
+  @UseGuards(BasicAuthGuard)
+  @Get('order/:id')
+  async getOrderById(
+    @Req() req: AppRequest,
+    @Param('id') orderId: string,
+  ): Promise<Order> {
+    const userId = getUserIdFromRequest(req);
+    const order = await this.orderService.findById(orderId, userId);
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    return order;
+  }
+
+  @UseGuards(BasicAuthGuard)
+  @Delete('order/:id')
+  async deleteOrderById(
+    @Req() req: AppRequest,
+    @Param('id') orderId: string,
+  ): Promise<void> {
+    const userId = getUserIdFromRequest(req);
+    const order = await this.orderService.findById(orderId, userId);
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    await this.orderService.deleteById(orderId);
+  }
+
+  @UseGuards(BasicAuthGuard)
+  @Put('order/:id')
+  async updateOrderStatusById(
+    @Req() req: AppRequest,
+    @Param('id') orderId: string,
+    @Body() body: { status: string; comment?: string },
+  ): Promise<void> {
+    const validStatuses = Object.values(OrderStatus) as string[];
+    if (!body.status || !validStatuses.includes(body.status)) {
+      throw new BadRequestException(`Invalid status. Allowed: ${validStatuses.join(', ')}`);
+    }
+    const userId = getUserIdFromRequest(req);
+    const order = await this.orderService.findById(orderId, userId);
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    return await this.orderService.updateStatusById(orderId, body.status as OrderStatus, body.comment);
   }
 }

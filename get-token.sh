@@ -10,7 +10,7 @@ fi
 source .env
 
 
-REGISTER_PAYLOAD="{\"name\":\"$AUTH_USERNAME\",\"password\":\"$AUTH_PASSWORD\"}"
+REGISTER_PAYLOAD="{\"username\":\"$AUTH_USERNAME\",\"password\":\"$AUTH_PASSWORD\"}"
 LOGIN_PAYLOAD="{\"username\":\"$AUTH_USERNAME\",\"password\":\"$AUTH_PASSWORD\"}"
 
 curl -s --header "Content-Type: application/json" \

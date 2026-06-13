@@ -28,7 +28,7 @@ export const handler: Handler = async (
   callback: Callback,
 ) => {
   console.log('REQUEST:', {
-    method: event.requestContext.http.method,
+    method: event.requestContext?.http?.method,
     path: event.rawPath,
     headers: event.headers,
   });

@@ -1,25 +1,24 @@
 import {
+  Body,
   Controller,
   Get,
+  HttpCode,
   Request,
   Post,
   UseGuards,
   HttpStatus,
-  Body,
-  HttpCode,
 } from '@nestjs/common';
 import {
-  LocalAuthGuard,
   AuthService,
-  // JwtAuthGuard,
   BasicAuthGuard,
+  LocalAuthGuard,
 } from './auth';
-import { User } from './users';
 import { AppRequest } from './shared';
+import { User } from './users';
 
 @Controller()
 export class AppController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Get(['', 'ping'])
   healthCheck() {
@@ -31,18 +30,18 @@ export class AppController {
 
   @Post('api/auth/register')
   @HttpCode(HttpStatus.CREATED)
-  // TODO ADD validation
-  register(@Body() body: User) {
-    return this.authService.register(body);
+  register(@Body() body: { username: string; password: string }) {
+    return this.authService.register({
+      username: body.username,
+      password: body.password,
+    });
   }
 
   @UseGuards(LocalAuthGuard)
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   @Post('api/auth/login')
-  async login(@Request() req: AppRequest) {
-    const token = this.authService.login(req.user, 'basic');
-
-    return token;
+  login(@Request() req: AppRequest) {
+    return this.authService.login(req.user as User);
   }
 
   @UseGuards(BasicAuthGuard)
