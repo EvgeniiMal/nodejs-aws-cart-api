@@ -6,11 +6,10 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-ARG NODE_VERSION=24.15.0
 
 ################################################################################
 # Use node image for base image for all stages.
-FROM node:${NODE_VERSION}-alpine AS base
+FROM node:24-alpine AS base
 
 # Set working directory for all build stages.
 WORKDIR /usr/src/app
@@ -67,4 +66,4 @@ COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 EXPOSE 3000
 
 # Run the application.
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/main.js"]
