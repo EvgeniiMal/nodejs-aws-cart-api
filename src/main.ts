@@ -1,37 +1,24 @@
 import { NestFactory } from '@nestjs/core';
-import serverlessExpress from '@codegenie/serverless-express';
-import { Callback, Context, Handler } from 'aws-lambda';
+
+import helmet from 'helmet';
+
 import { AppModule } from './app.module';
+import { ConfigService } from '@nestjs/config';
 
-let server: Handler;
-
-async function bootstrap(): Promise<Handler> {
+async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const configService = app.get(ConfigService);
+
+  const port = process.env.PORT || configService.get('APP_PORT') || 3000;
+
+
   app.enableCors({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
+    origin: (req, callback) => callback(null, true),
   });
+  app.use(helmet());
 
-  const expressApp = app.getHttpAdapter().getInstance();
-
-  await app.init();
-  return serverlessExpress({ app: expressApp });
+  await app.listen(port, '0.0.0.0');
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
-
-export const handler: Handler = async (
-  event: any,
-  context: Context,
-  callback: Callback,
-) => {
-  console.log('REQUEST:', {
-    method: event.requestContext?.http?.method,
-    path: event.rawPath,
-    headers: event.headers,
-  });
-  server = server ?? (await bootstrap());
-  return server(event, context, callback);
-};
+bootstrap();
