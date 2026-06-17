@@ -23,12 +23,12 @@
 **/docker-compose*
 **/compose.y*ml
 **/Dockerfile*
-**/node_modules
+**/node_modules #We going to build node_modules in the image, so we don't need to copy it from the host machine.
 **/npm-debug.log
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
 **/build
-**/dist
+**/dist #We going to build dist in the image, so we don't need to copy it from the host machine.
 LICENSE
 README.md
