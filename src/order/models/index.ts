@@ -1,14 +1,13 @@
-import { Address, OrderStatus } from '../type';
+import { Delivery, OrderStatus, Payment } from '../type';
 
 export type Order = {
   id?: string;
   userId: string;
-  items: Array<{ productId: string; count: number }>;
   cartId: string;
-  address: Address;
-  statusHistory: Array<{
-    status: OrderStatus.Open;
-    timestamp: number;
-    comment: string;
-  }>;
+  items: Array<{ productId: string; count: number }>;
+  payment: Payment;
+  delivery: Delivery;
+  comments: string | null;
+  status: OrderStatus;
+  total: number;
 };

@@ -5,5 +5,8 @@ import { AppRequest } from '../models';
  * @returns {string}
  */
 export function getUserIdFromRequest(request: AppRequest): string {
-  return request.user && request.user.id;
+  if (!request.user?.id) {
+    throw new Error('User id is missing from request');
+  }
+  return request.user.id;
 }
